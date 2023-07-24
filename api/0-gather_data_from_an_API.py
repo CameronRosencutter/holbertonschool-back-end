@@ -1,29 +1,30 @@
 #!/usr/bin/python3
-"""Gets infro about user from an API"""
+"""Script to use a REST API for a given employee ID, returns
+information about his/her TODO list progress"""
 import requests
-
-
-def display_employee_progress(employee_id):
-    """ script must display to stdout the employee todo list progress """
-    url = "https://jsonplaceholder.typicode.com"
-    empl_url = f"{url}/users/{employee_id}"
-    todo_url = f"{url}/todos"
-
-    empl_data = requests.get(empl_url).json()
-    todo_data = requests.get(todo_url,
-                             params={"userId": employee_id}).json()
-
-    empl_name = empl_data.get("name")
-    completed_tasks = [t["title"] for t in todo_data if t["completed"]]
-    num_done = len(completed_tasks)
-    num_total = len(todo_data)
-
-    print("Employee {} is done with tasks({}/{}):"
-          .format(empl_name, num_done, num_total))
-    for task in completed_tasks:
-        print(f"\t {task}")
+import sys
 
 if __name__ == "__main__":
-    import sys
+    if len(sys.argv) < 2:
+        print(f"missing employee id as argument")
+        sys.exit(1)
 
-    display_employee_progress(int(sys.argv[1]))
+    URL = "https://jsonplaceholder.typicode.com"
+    EMPLOYEE_ID = sys.argv[1]
+
+    EMPLOYEE_TODOS = requests.get(f"{URL}/users/{EMPLOYEE_ID}/todos",
+                                  params={"_expand": "user"})
+    data = EMPLOYEE_TODOS.json()
+
+    EMPLOYEE_NAME = data[0]["user"]["name"]
+    TOTAL_NUMBER_OF_TASKS = len(data)
+    NUMBER_OF_DONE_TASKS = 0
+    TASK_TITLE = []
+    for task in data:
+        if task["completed"]:
+            NUMBER_OF_DONE_TASKS += 1
+            TASK_TITLE.append(task["title"])
+    print(f"Employee {EMPLOYEE_NAME} is done with tasks"
+          f"({NUMBER_OF_DONE_TASKS}/{TOTAL_NUMBER_OF_TASKS}):")
+    for title in TASK_TITLE:
+        print("\t ", title)
