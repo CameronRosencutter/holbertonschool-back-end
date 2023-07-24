@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-"""checks student output"""
+"""
+Checks student output for returning info from REST API
+"""
+
 import requests
 import sys
 
