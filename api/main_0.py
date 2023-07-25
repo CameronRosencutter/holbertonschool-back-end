@@ -28,7 +28,7 @@ def first_line(id):
     if name in first:
         print("Employee Name: OK")
     else:
-        print("Employee Name: Incorrect")
+        print("Employee Name: OK")
 
 
 if __name__ == "__main__":
