@@ -1,35 +1,25 @@
 #!/usr/bin/python3
-"""
-Checks student output for returning info from REST API
-"""
-
+"""Script that prints specific information from an API"""
 import requests
 import sys
 
-users_url = "https://jsonplaceholder.typicode.com/users"
-todos_url = "https://jsonplaceholder.typicode.com/todos"
+if __name__ == '__main__':
+    API_URL = 'https://jsonplaceholder.typicode.com'
 
+    id = sys.argv[1]
+    request = requests.get('{}/users/{}/todos'.format(
+        API_URL, id), params={"_expand": "user"})
 
-def first_line(id):
-    """ Fetch user name """
+    response = request.json()
 
-    resp = requests.get(users_url).json()
+    completed_tasks = [task for task in response if task['completed']]
+    EMPLOYEE_NAME = response[0]['user']['name']
+    NUMBER_OF_DONE_TASKS = len(completed_tasks)
+    TOTAL_NUMBER_OF_TASKS = len(response)
 
-    name = None
-    for i in resp:
-        if i['id'] == id:
-            name = i['name']
+    print("Employee {} is done with tasks({}/{}):".format(
+        EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS
+    ))
 
-    filename = 'student_output'
-
-    with open(filename, 'r') as f:
-        first = f.readline().strip()
-
-    if name in first:
-        print("Employee Name: OK")
-    else:
-        print("Employee Name: OK")
-
-
-if __name__ == "__main__":
-    first_line(int(sys.argv[1]))
+    for task in completed_tasks:
+        print("\t {}".format(task['title']))
