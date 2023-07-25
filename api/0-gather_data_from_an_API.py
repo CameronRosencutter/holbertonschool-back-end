@@ -1,25 +1,29 @@
 #!/usr/bin/python3
-"""Script that prints specific information from an API"""
+"""Gets infro about user from an API"""
 import requests
-import sys
 
-if __name__ == '__main__':
-    API_URL = 'https://jsonplaceholder.typicode.com'
 
-    id = sys.argv[1]
-    request = requests.get('{}/users/{}/todos'.format(
-        API_URL, id), params={"_expand": "user"})
+def display_employee_progress(employee_id):
+    """ script must display to stdout the employee todo list progress """
+    url = "https://jsonplaceholder.typicode.com"
+    empl_url = f"{url}/users/{employee_id}"
+    todo_url = f"{url}/todos"
 
-    response = request.json()
+    empl_data = requests.get(empl_url).json()
+    todo_data = requests.get(todo_url,
+                             params={"userId": employee_id}).json()
 
-    completed_tasks = [task for task in response if task['completed']]
-    EMPLOYEE_NAME = response[0]['user']['name']
-    NUMBER_OF_DONE_TASKS = len(completed_tasks)
-    TOTAL_NUMBER_OF_TASKS = len(response)
+    empl_name = empl_data.get("name")
+    completed_tasks = [t["title"] for t in todo_data if t["completed"]]
+    num_done = len(completed_tasks)
+    num_total = len(todo_data)
 
-    print("Employee {} is done with tasks({}/{}):".format(
-        EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS
-    ))
-
+    print("Employee {} is done with tasks({}/{}):"
+          .format(empl_name, num_done, num_total))
     for task in completed_tasks:
-        print("\t {}".format(task['title']))
+        print(f"\t {task}")
+
+if __name__ == "__main__":
+    import sys
+
+    display_employee_progress(int(sys.argv[1]))
