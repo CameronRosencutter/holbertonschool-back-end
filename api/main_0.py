@@ -1,25 +1,32 @@
 #!/usr/bin/python3
-"""Script that prints specific information from an API"""
+"""checks student output"""
 import requests
 import sys
 
-if __name__ == '__main__':
-    API_URL = 'https://jsonplaceholder.typicode.com'
+users_url = "https://jsonplaceholder.typicode.com/users"
+todos_url = "https://jsonplaceholder.typicode.com/todos"
 
-    id = sys.argv[1]
-    request = requests.get('{}/users/{}/todos'.format(
-        API_URL, id), params={"_expand": "user"})
 
-    response = request.json()
+def first_line(id):
+    """ Fetch user name """
 
-    completed_tasks = [task for task in response if task['completed']]
-    EMPLOYEE_NAME = response[0]['user']['name']
-    NUMBER_OF_DONE_TASKS = len(completed_tasks)
-    TOTAL_NUMBER_OF_TASKS = len(response)
+    resp = requests.get(users_url).json()
 
-    print("Employee {} is done with tasks({}/{}):".format(
-        EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS
-    ))
+    name = None
+    for i in resp:
+        if i['id'] == id:
+            name = i['name']
 
-    for task in completed_tasks:
-        print("\t {}".format(task['title']))
+    filename = 'student_output'
+
+    with open(filename, 'r') as f:
+        first = f.readline().strip()
+
+    if name in first:
+        print("Employee Name: OK")
+    else:
+        print("Employee Name: Incorrect")
+
+
+if __name__ == "__main__":
+    first_line(int(sys.argv[1]))
