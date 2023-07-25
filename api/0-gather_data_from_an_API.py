@@ -1,42 +1,25 @@
 #!/usr/bin/python3
-""" This script uses REST API to retrieve the task completed
-    by a given employee ID """
-
+"""Script that prints specific information from an API"""
 import requests
-from sys import argv
+import sys
 
+if __name__ == '__main__':
+    API_URL = 'https://jsonplaceholder.typicode.com'
 
-def toDo():
-    """ Function retrieves the todos list from api """
-    emp_id = int(argv[1])
-    todo_url = f"https://jsonplaceholder.typicode.com/users/{emp_id}/todos"
-    id_response = requests.get(todo_url)
+    id = sys.argv[1]
+    request = requests.get('{}/users/{}/todos'.format(
+        API_URL, id), params={"_expand": "user"})
 
-    if id_response.status_code == 200:
-        todo_data = id_response.json()
-        done_tasks = sum(1 for item in todo_data if item["completed"])
-        total_tasks = len(todo_data)
+    response = request.json()
 
-        emp_name_url = "https://jsonplaceholder.typicode.com/users"
-        name_response = requests.get(emp_name_url)
+    completed_tasks = [task for task in response if task['completed']]
+    EMPLOYEE_NAME = response[0]['user']['name']
+    NUMBER_OF_DONE_TASKS = len(completed_tasks)
+    TOTAL_NUMBER_OF_TASKS = len(response)
 
-        if name_response.status_code == 200:
-            name_data = name_response.json()
-            for user in name_data:
-                if user["id"] == emp_id:
-                    emp_name = user["name"]
+    print("Employee {} is done with tasks({}/{}):".format(
+        EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS
+    ))
 
-            print(f"Employee {emp_name} is done with"
-                  f" tasks({done_tasks}/{total_tasks}):")
-        else:
-            print("Error: Unable to fetch data.")
-
-        for item in todo_data:
-            if item["completed"]:
-                print(f'\t {item["title"]}')
-    else:
-        print("Error: Unable to fetch data.")
-
-
-if __name__ == "__main__":
-    toDo()
+    for task in completed_tasks:
+        print("\t {}".format(task['title']))
